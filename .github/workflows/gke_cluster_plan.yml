@@ -9,25 +9,6 @@ on:
       - Terraform/**
 
 jobs:
-  test_job:
-    runs-on: ubuntu-latest
-    environment: develop
-    defaults:
-      run:
-        shell: bash
-    env:
-      GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
-      GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          lfs: true
-      
-      - name: Test 
-        run: echo $GITHUB_BASE_REF
-
-      - name: Test 2
-        run: echo $GITHUB_HEAD_REF
 
   terraform-plan-gke-develop:
     if: startsWith( github.head_ref, 'feature/' )
