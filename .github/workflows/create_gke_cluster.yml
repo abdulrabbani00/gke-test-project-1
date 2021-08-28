@@ -35,11 +35,11 @@ jobs:
       - name: Use gcloud CLI
         run: gcloud info
       
-      - name: Write gloud auth locally and export value for Terraform
-        run: |
-          cat ${{ env.GCP_SA_KEY }} > $HOME/gcloud_auth.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud_auth.json" >> $GITHUB_ENV
-           - name: 'Terraform Init'
+#      - name: Write gloud auth locally and export value for Terraform
+#        run: |
+#          cat ${{ env.GCP_SA_KEY }} > $HOME/gcloud_auth.json
+#          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud_auth.json" >> $GITHUB_ENV
+#           - name: 'Terraform Init'
 
       - name: Terraform Init
         uses: hashicorp/terraform-github-actions@master
