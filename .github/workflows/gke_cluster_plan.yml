@@ -1,0 +1,100 @@
+name: Terraform Plan GKE
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+    paths: 
+      - Terraform/**
+      - .github/workflows/gke_cluster_plan.yml
+
+jobs:
+
+  terraform-plan-gke-develop:
+    if: startsWith( github.head_ref, 'feature/' )
+    runs-on: ubuntu-latest
+    environment: develop
+    defaults:
+      run:
+        shell: bash
+    env:
+      GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
+      GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Use gcloud CLI
+        run: gcloud info
+      
+      - name: Terraform Init
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_comment: true
+
+      - name: Terraform Plan
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'plan'
+          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_comment: true
+          args: "--var-file=develop.tfvars"
+        
+  terraform-plan-gke-prod:
+    if: github.head_ref == 'develop'
+    runs-on: ubuntu-latest
+    environment: prod
+    defaults:
+      run:
+        shell: bash
+    env:
+      GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
+      GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      
+      - name: Checkout LFS objects
+        run: git lfs pull
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Use gcloud CLI
+        run: gcloud info
+      
+      - name: Terraform Init
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: "./Terraform/env/prod"
+          tf_actions_comment: true
+
+      - name: Terraform Plan
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'plan'
+          tf_actions_working_dir: "./Terraform/env/prod"
+          tf_actions_comment: true
+          args: "--var-file=prod.tfvars"
+        
