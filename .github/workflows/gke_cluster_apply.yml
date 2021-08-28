@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - Terraform/**
+      - .github/workflows/gke_cluster_apply.yml
 
 jobs:
   terraform-apply-gke-develop:
