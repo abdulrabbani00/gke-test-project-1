@@ -37,7 +37,7 @@ jobs:
       
       - name: Write gloud auth locally and export value for Terraform
         run: |
-          echo ${{ env.GCP_SA_KEY }} > $HOME/gcloud_auth.json
+          cat ${{ env.GCP_SA_KEY }} > $HOME/gcloud_auth.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud_auth.json" >> $GITHUB_ENV
            - name: 'Terraform Init'
 
