@@ -30,7 +30,7 @@ jobs:
         run: echo $GITHUB_HEAD_REF
 
   terraform-plan-gke-develop:
-    if: startsWith( github.head_ref, 'refs/heads/feature/' )
+    if: startsWith( github.head_ref, 'feature/' )
     runs-on: ubuntu-latest
     environment: develop
     defaults:
@@ -72,7 +72,7 @@ jobs:
           args: "--var-file=develop.tfvars"
         
   terraform-plan-gke-prod:
-    if: github.ref == 'refs/heads/develop'
+    if: github.head_ref == 'develop'
     runs-on: ubuntu-latest
     environment: prod
     defaults:
