@@ -27,7 +27,7 @@ jobs:
         run: echo $GITHUB_BASE_REF
 
   terraform-plan-gke-develop:
-    if: startsWith( GITHUB_BASE_REF, 'refs/heads/feature/' )
+    if: startsWith( github.base_ref, 'refs/heads/feature/' )
     runs-on: ubuntu-latest
     environment: develop
     defaults:
