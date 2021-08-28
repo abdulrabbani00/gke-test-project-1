@@ -1,13 +1,19 @@
-name: Terraform Apply GKE
+name: Terraform Plan GKE
 
 on:
-  push:
+  pull_request:
     branches: 
       - develop
+    paths: 
+      - Terraform/**
+  push:
+    branches:
       - feature/**
+    paths: 
+      - Terraform/**
 
 jobs:
-  terraform-apply-gke-develop:
+  terraform-plan-gke-develop:
     if: startsWith( github.ref, 'refs/heads/feature/' ) || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     environment: develop
@@ -35,12 +41,6 @@ jobs:
       - name: Use gcloud CLI
         run: gcloud info
       
-#      - name: Write gloud auth locally and export value for Terraform
-#        run: |
-#          cat ${{ env.GCP_SA_KEY }} > $HOME/gcloud_auth.json
-#          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud_auth.json" >> $GITHUB_ENV
-#           - name: 'Terraform Init'
-
       - name: Terraform Init
         uses: hashicorp/terraform-github-actions@master
         with:
