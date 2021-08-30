@@ -84,7 +84,7 @@ jobs:
       - name: Install Flagger
         run: |
           helm repo add flagger https://flagger.app
-          helm install my-flagger flagger/flagger --version 1.4.2
+          helm upgrade --install my-flagger flagger/flagger --version 1.4.2
 
       - name: Install Istios
         run: |
