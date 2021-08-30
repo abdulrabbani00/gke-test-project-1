@@ -54,6 +54,36 @@ jobs:
           tf_actions_working_dir: "./Terraform/env/develop"
           tf_actions_comment: true
           args: "--var-file=develop.tfvars"
+
+      - name: Export TF Parameters 
+        run: |
+          ClusterName=$(terraform output cluster_name)
+          ClusterLocation=$(terraform output cluster_location)
+          echo "ClusterName=$ClusterName" >> $GITHUB_ENV
+          echo "ClusterLocation=$ClusterLocation" >> $GITHUB_ENV
+
+      - name: Get Credentials
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: $ClusterName
+          location: $ClusterLocation
+          credentials: ${{ env.GCP_SA_KEY }}
+      
+      - name: Get Pods
+        run: kubectl get pods -A 
+
+      - name: Install Flagger
+        run: |
+          helm repo add flagger https://flagger.app
+          helm install my-flagger flagger/flagger --version 1.4.2
+
+      - name: Install Istios
+        run: |
+          helm repo add stevehipwell https://stevehipwell.github.io/helm-charts/
+          helm install my-istio-operator stevehipwell/istio-operator --version 1.2.2
+
+      - name: Get pods after bootstrap
+        run: kubectl get pods -A 
         
   terraform-apply-gke-master:
     if: github.ref == 'refs/heads/master'
@@ -99,4 +129,34 @@ jobs:
           tf_actions_working_dir: "./Terraform/env/prod"
           tf_actions_comment: true
           args: "--var-file=prod.tfvars"
+
+      - name: Export TF Parameters 
+        run: |
+          ClusterName=$(terraform output cluster_name)
+          ClusterLocation=$(terraform output cluster_location)
+          echo "ClusterName=$ClusterName" >> $GITHUB_ENV
+          echo "ClusterLocation=$ClusterLocation" >> $GITHUB_ENV
+
+      - name: Get Credentials
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: $ClusterName
+          location: $ClusterLocation
+          credentials: ${{ env.GCP_SA_KEY }}
+      
+      - name: Get Pods
+        run: kubectl get pods -A 
+
+      - name: Install Flagger
+        run: |
+          helm repo add flagger https://flagger.app
+          helm install my-flagger flagger/flagger --version 1.4.2
+
+      - name: Install Istios
+        run: |
+          helm repo add stevehipwell https://stevehipwell.github.io/helm-charts/
+          helm install my-istio-operator stevehipwell/istio-operator --version 1.2.2
+
+      - name: Get pods after bootstrap
+        run: kubectl get pods -A 
         
