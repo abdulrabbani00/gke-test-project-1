@@ -33,5 +33,5 @@ output "cluster_name" {
 }
 
 output "cluster_location" {
-  value = tolist(google_container_cluster.primary.node_locations)[0]
+  value = tolist(google_container_cluster.primary.node_locations)[1]
 }
