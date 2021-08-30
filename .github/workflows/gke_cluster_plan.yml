@@ -23,8 +23,6 @@ jobs:
       GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
     steps:
       - uses: actions/checkout@v2
-        with:
-          lfs: true
       
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
@@ -65,11 +63,6 @@ jobs:
       GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
     steps:
       - uses: actions/checkout@v2
-        with:
-          lfs: true
-      
-      - name: Checkout LFS objects
-        run: git lfs pull
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
