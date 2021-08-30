@@ -14,5 +14,5 @@ cluster_location = "us-central1"
 ## Node Pool
 primary_node_pool_name = "pool-prod-1"
 primary_node_pool_location = "us-central1"
-primary_node_pool_node_count = 4
+primary_node_pool_node_count = 2
 primary_node_machine_type = "e2-medium"
