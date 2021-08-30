@@ -18,6 +18,7 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: "./Terraform/env/develop"
     env:
       GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
       GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
@@ -98,6 +99,7 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: "./Terraform/env/prod"
     env:
       GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
       GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
