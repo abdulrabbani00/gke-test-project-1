@@ -122,7 +122,7 @@ jobs:
         with:
           tf_actions_version: 0.15.4 
           tf_actions_subcommand: 'init'
-          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_working_dir: "./Terraform/env/prod"
           tf_actions_comment: true
 
       - name: Terraform Apply
@@ -130,7 +130,7 @@ jobs:
         with:
           tf_actions_version: 0.15.4 
           tf_actions_subcommand: 'apply'
-          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_working_dir: "./Terraform/env/prod"
           tf_actions_comment: true
           args: "--var-file=develop.tfvars"
 
