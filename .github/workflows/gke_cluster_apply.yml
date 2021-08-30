@@ -5,13 +5,14 @@ on:
     branches: 
       - develop
       - master
+      - feature/terraform-gke
     paths:
       - Terraform/**
       - .github/workflows/gke_cluster_apply.yml
 
 jobs:
   terraform-apply-gke-develop:
-    if: github.ref == 'refs/heads/develop'
+    #if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     environment: develop
     defaults:
@@ -37,6 +38,11 @@ jobs:
 
       - name: Use gcloud CLI
         run: gcloud info
+
+      - name: Setup Terraform wrapper
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
       
       - name: Terraform Init
         uses: hashicorp/terraform-github-actions@master
@@ -112,6 +118,11 @@ jobs:
 
       - name: Use gcloud CLI
         run: gcloud info
+      
+      - name: Setup Terraform wrapper
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
       
       - name: Terraform Init
         uses: hashicorp/terraform-github-actions@master
