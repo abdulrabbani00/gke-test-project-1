@@ -1,0 +1,173 @@
+name: Terraform Apply GKE
+
+on:
+  push:
+    branches: 
+      - develop
+      - master
+    paths:
+      - Terraform/**
+      - .github/workflows/gke_cluster_apply.yml
+
+jobs:
+  terraform-apply-gke-develop:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: develop
+    defaults:
+      run:
+        shell: bash
+        working-directory: "./Terraform/env/develop"
+    env:
+      GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
+      GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      
+      - name: Checkout LFS objects
+        run: git lfs pull
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Use gcloud CLI
+        run: gcloud info
+
+      - name: Setup Terraform wrapper
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+      
+      - name: Terraform Init
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_comment: true
+
+      - name: Terraform Apply
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'apply'
+          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_comment: true
+          args: "--var-file=develop.tfvars"
+
+      - name: Export TF Parameters 
+        run: |
+          ClusterName=$(terraform output cluster_name)
+          ClusterLocation=$(terraform output cluster_location)
+          cluster_name=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterName` 
+          cluster_location=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterLocation` 
+          echo "ClusterName=$cluster_name" >> $GITHUB_ENV
+          echo "ClusterLocation=$cluster_location" >> $GITHUB_ENV
+
+      - name: Get Credentials
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: ${{ env.ClusterName }}
+          location: ${{ env.ClusterLocation }}
+          credentials: ${{ env.GCP_SA_KEY }}
+      
+      - name: Get Pods
+        run: kubectl get pods -A 
+
+      - name: Install Flagger
+        run: |
+          helm repo add flagger https://flagger.app
+          helm upgrade --install my-flagger flagger/flagger --version 1.4.2
+
+      - name: Install Istios
+        run: |
+          helm repo add stevehipwell https://stevehipwell.github.io/helm-charts/
+          helm upgrade --install my-istio-operator stevehipwell/istio-operator --version 1.2.2
+
+      - name: Get pods after bootstrap
+        run: kubectl get pods -A 
+        
+  terraform-apply-gke-master:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: prod
+    defaults:
+      run:
+        shell: bash
+        working-directory: "./Terraform/env/prod"
+    env:
+      GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
+      GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
+    steps:
+      - name: Checkout LFS objects
+        run: git lfs pull
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Use gcloud CLI
+        run: gcloud info
+
+      - name: Setup Terraform wrapper
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+      
+      - name: Terraform Init
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_comment: true
+
+      - name: Terraform Apply
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.15.4 
+          tf_actions_subcommand: 'apply'
+          tf_actions_working_dir: "./Terraform/env/develop"
+          tf_actions_comment: true
+          args: "--var-file=develop.tfvars"
+
+      - name: Export TF Parameters 
+        run: |
+          ClusterName=$(terraform output cluster_name)
+          ClusterLocation=$(terraform output cluster_location)
+          cluster_name=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterName` 
+          cluster_location=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterLocation` 
+          echo "ClusterName=$cluster_name" >> $GITHUB_ENV
+          echo "ClusterLocation=$cluster_location" >> $GITHUB_ENV
+
+      - name: Get Credentials
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: ${{ env.ClusterName }}
+          location: ${{ env.ClusterLocation }}
+          credentials: ${{ env.GCP_SA_KEY }}
+      
+      - name: Get Pods
+        run: kubectl get pods -A 
+
+      - name: Install Flagger
+        run: |
+          helm repo add flagger https://flagger.app
+          helm upgrade --install my-flagger flagger/flagger --version 1.4.2
+
+      - name: Install Istios
+        run: |
+          helm repo add stevehipwell https://stevehipwell.github.io/helm-charts/
+          helm upgrade --install my-istio-operator stevehipwell/istio-operator --version 1.2.2
+
+      - name: Get pods after bootstrap
+        run: kubectl get pods -A 

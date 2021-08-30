@@ -1,0 +1,15 @@
+# Terraform files
+.terraform
+*.terraform/*
+**.terraform.lock.hcl
+# .tfstate files
+*.tfstate
+*.tfstate.*
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+credentials.sh
