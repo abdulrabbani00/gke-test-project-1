@@ -66,8 +66,8 @@ jobs:
         run: |
           ClusterName=$(terraform output cluster_name)
           ClusterLocation=$(terraform output cluster_location)
-          echo "ClusterName=$ClusterName" >> $GITHUB_ENV
-          echo "ClusterLocation=$ClusterLocation" >> $GITHUB_ENV
+          echo ClusterName=$ClusterName >> $GITHUB_ENV
+          echo ClusterLocation=$ClusterLocation >> $GITHUB_ENV
 
       - name: Get Credentials
         uses: google-github-actions/get-gke-credentials@main
