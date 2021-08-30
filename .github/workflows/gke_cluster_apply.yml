@@ -11,7 +11,7 @@ on:
 
 jobs:
   terraform-apply-gke-develop:
-    #if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     environment: develop
     defaults:
@@ -88,7 +88,7 @@ jobs:
       - name: Install Istios
         run: |
           helm repo add stevehipwell https://stevehipwell.github.io/helm-charts/
-          helm install my-istio-operator stevehipwell/istio-operator --version 1.2.2
+          helm upgrade --install my-istio-operator stevehipwell/istio-operator --version 1.2.2
 
       - name: Get pods after bootstrap
         run: kubectl get pods -A 
@@ -105,10 +105,6 @@ jobs:
       GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
       GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
     steps:
-      - uses: actions/checkout@v2
-        with:
-          lfs: true
-      
       - name: Checkout LFS objects
         run: git lfs pull
 
@@ -121,7 +117,7 @@ jobs:
 
       - name: Use gcloud CLI
         run: gcloud info
-      
+
       - name: Setup Terraform wrapper
         uses: hashicorp/setup-terraform@v1
         with:
@@ -132,7 +128,7 @@ jobs:
         with:
           tf_actions_version: 0.15.4 
           tf_actions_subcommand: 'init'
-          tf_actions_working_dir: "./Terraform/env/prod"
+          tf_actions_working_dir: "./Terraform/env/develop"
           tf_actions_comment: true
 
       - name: Terraform Apply
@@ -140,16 +136,18 @@ jobs:
         with:
           tf_actions_version: 0.15.4 
           tf_actions_subcommand: 'apply'
-          tf_actions_working_dir: "./Terraform/env/prod"
+          tf_actions_working_dir: "./Terraform/env/develop"
           tf_actions_comment: true
-          args: "--var-file=prod.tfvars"
+          args: "--var-file=develop.tfvars"
 
       - name: Export TF Parameters 
         run: |
           ClusterName=$(terraform output cluster_name)
           ClusterLocation=$(terraform output cluster_location)
-          echo "ClusterName=$ClusterName" >> $GITHUB_ENV
-          echo "ClusterLocation=$ClusterLocation" >> $GITHUB_ENV
+          cluster_name=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterName` 
+          cluster_location=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterLocation` 
+          echo "ClusterName=$cluster_name" >> $GITHUB_ENV
+          echo "ClusterLocation=$cluster_location" >> $GITHUB_ENV
 
       - name: Get Credentials
         uses: google-github-actions/get-gke-credentials@main
@@ -164,13 +162,12 @@ jobs:
       - name: Install Flagger
         run: |
           helm repo add flagger https://flagger.app
-#          helm upgrade --install my-flagger flagger/flagger --version 1.4.2
+          helm upgrade --install my-flagger flagger/flagger --version 1.4.2
 
       - name: Install Istios
         run: |
           helm repo add stevehipwell https://stevehipwell.github.io/helm-charts/
-          helm install my-istio-operator stevehipwell/istio-operator --version 1.2.2
+          helm upgrade --install my-istio-operator stevehipwell/istio-operator --version 1.2.2
 
       - name: Get pods after bootstrap
         run: kubectl get pods -A 
-        
