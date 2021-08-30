@@ -132,7 +132,7 @@ jobs:
           tf_actions_subcommand: 'apply'
           tf_actions_working_dir: "./Terraform/env/prod"
           tf_actions_comment: true
-          args: "--var-file=develop.tfvars"
+          args: "--var-file=prod.tfvars"
 
       - name: Export TF Parameters 
         run: |
