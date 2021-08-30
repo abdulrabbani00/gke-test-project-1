@@ -11,12 +11,13 @@ on:
 
 jobs:
   terraform-apply-gke-develop:
-    if: github.ref == 'refs/heads/develop'
+    #if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     environment: develop
     defaults:
       run:
         shell: bash
+        working-directory: "./Terraform/env/develop"
     env:
       GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
       GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
@@ -37,6 +38,11 @@ jobs:
 
       - name: Use gcloud CLI
         run: gcloud info
+
+      - name: Setup Terraform wrapper
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
       
       - name: Terraform Init
         uses: hashicorp/terraform-github-actions@master
@@ -59,14 +65,16 @@ jobs:
         run: |
           ClusterName=$(terraform output cluster_name)
           ClusterLocation=$(terraform output cluster_location)
-          echo "ClusterName=$ClusterName" >> $GITHUB_ENV
-          echo "ClusterLocation=$ClusterLocation" >> $GITHUB_ENV
+          cluster_name=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterName` 
+          cluster_location=`sed -e 's/^"//' -e 's/"$//' <<<$ClusterLocation` 
+          echo "ClusterName=$cluster_name" >> $GITHUB_ENV
+          echo "ClusterLocation=$cluster_location" >> $GITHUB_ENV
 
       - name: Get Credentials
         uses: google-github-actions/get-gke-credentials@main
         with:
-          cluster_name: $ClusterName
-          location: $ClusterLocation
+          cluster_name: ${{ env.ClusterName }}
+          location: ${{ env.ClusterLocation }}
           credentials: ${{ env.GCP_SA_KEY }}
       
       - name: Get Pods
@@ -75,7 +83,7 @@ jobs:
       - name: Install Flagger
         run: |
           helm repo add flagger https://flagger.app
-          helm install my-flagger flagger/flagger --version 1.4.2
+          helm upgrade --install my-flagger flagger/flagger --version 1.4.2
 
       - name: Install Istios
         run: |
@@ -92,6 +100,7 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: "./Terraform/env/prod"
     env:
       GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
       GCP_SA_KEY: ${{secrets.GCP_SA_KEY}}
@@ -112,6 +121,11 @@ jobs:
 
       - name: Use gcloud CLI
         run: gcloud info
+      
+      - name: Setup Terraform wrapper
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
       
       - name: Terraform Init
         uses: hashicorp/terraform-github-actions@master
@@ -140,8 +154,8 @@ jobs:
       - name: Get Credentials
         uses: google-github-actions/get-gke-credentials@main
         with:
-          cluster_name: $ClusterName
-          location: $ClusterLocation
+          cluster_name: ${{ env.ClusterName }}
+          location: ${{ env.ClusterLocation }}
           credentials: ${{ env.GCP_SA_KEY }}
       
       - name: Get Pods
@@ -150,7 +164,7 @@ jobs:
       - name: Install Flagger
         run: |
           helm repo add flagger https://flagger.app
-          helm install my-flagger flagger/flagger --version 1.4.2
+#          helm upgrade --install my-flagger flagger/flagger --version 1.4.2
 
       - name: Install Istios
         run: |
